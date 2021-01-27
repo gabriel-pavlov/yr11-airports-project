@@ -5,42 +5,38 @@ Module Module1
         Public code As String
         Public name As String
         Public departure As Boolean
-        Public distance1 As Integer
-        Public distance2 As Integer
+    End Class
+
+    Class Distance
+        Public departure As String
+        Public arival As String
+        Public distanceKm As Integer
     End Class
 
     Dim airports As New List(Of Airport)
+    Dim distances As New Dictionary(Of String, Dictionary(Of String, Distance))
+
     Dim selectedAirport As Airport
 
     Sub LoadInitialAirports()
 
         airports.Clear()
+        distances.Clear()
 
         Dim lpl As Airport = New Airport()
         lpl.code = "LPL"
         lpl.name = "Liverpool John Lennon"
         lpl.departure = True
-        lpl.distance1 = 0
-        lpl.distance2 = 0
 
         Dim boh As Airport = New Airport()
         boh.code = "BOH"
         boh.name = "Bournemouth International"
         boh.departure = True
-        boh.distance1 = 0
-        boh.distance2 = 0
-
-
-        Dim int As Airport = New Airport()
-        int.code = "INT"
-        int.name = "International"
-        int.departure = False
-        int.distance1 = 0
-        int.distance2 = 0
 
         airports.Add(lpl)
+        distances.Add(lpl.code, New Dictionary(Of String, Distance))
         airports.Add(boh)
-        airports.Add(int)
+        distances.Add(boh.code, New Dictionary(Of String, Distance))
 
     End Sub
 
@@ -50,6 +46,8 @@ Module Module1
         Call Sub() PrintWelcome()
 
         Call Sub() LoadInitialAirports()
+
+        Call Sub() LoadCSVAirports()
 
         Dim selection As String
         Dim finish As Boolean
@@ -79,7 +77,7 @@ Module Module1
                     Call Sub() Quit()
                     finish = True
                 Case Else
-                    Console.WriteLine("Invalid option: " + selection)
+                    Console.WriteLine("Invalid option: " & selection)
             End Select
 
         Loop
@@ -104,6 +102,7 @@ Module Module1
         Console.WriteLine("3. Enter price plan and calculate profit")
         Console.WriteLine("4. Clear data")
         Console.WriteLine("5. Quit")
+
 
     End Sub
 
@@ -135,10 +134,10 @@ Module Module1
                     If airport.code.ToLower = code.ToLower Then
                         If airport.departure Then
                             selectedAirport = airport
-                            Console.WriteLine("You have selected " + airport.name + " as your start")
+                            Console.WriteLine("You have selected " & airport.name & " as your start")
                             back = True
                         Else
-                            Console.WriteLine("You have selected " + airport.name + " which is invalid departure location")
+                            Console.WriteLine("You have selected " & airport.name & " which is invalid departure location")
                         End If
 
                     End If
@@ -149,92 +148,93 @@ Module Module1
 
         Loop
 
+    End Sub
+    Sub LoadCSVAirports()
 
-        'If uk_code = "LPL" Then
+        Using csv As New Microsoft.VisualBasic.FileIO.TextFieldParser(PrompFileToLoad())
 
-        'Console.WriteLine("You have selected Liverpool John Lennon as your start")
+            csv.TextFieldType = FileIO.FieldType.Delimited
+            csv.SetDelimiters(",")
 
-        'ElseIf uk_code = "BOH" Then
+            Dim count As Integer = 0
+            Dim currentRow As String()
+            While Not csv.EndOfData
+                Try
+                    currentRow = csv.ReadFields()
 
-        'Console.WriteLine("You have selected Bournemouth International as your start")
+                    Dim airport As New Airport()
+                    airport.code = currentRow(0)
+                    airport.name = currentRow(1)
+                    airport.departure = False
 
-        'Else
+                    airports.Add(airport)
 
-        'Console.WriteLine("Code is invalid")
-        'Call Sub() PrintMenu()
+                    Dim distanceLpl As New Distance()
+                    distanceLpl.departure = "LPL"
+                    distanceLpl.arival = airport.code
+                    distanceLpl.distanceKm = Convert.ToInt32(currentRow(2))
 
-        'End If
+                    Dim lplValue As New Dictionary(Of String, Distance)
+                    distances.TryGetValue(distanceLpl.departure, lplValue)
+                    lplValue.Add(airport.code, distanceLpl)
 
-        'Console.WriteLine("Please enter the three-letter airport code for your destination")
+                    Dim distanceBoh As New Distance()
+                    distanceBoh.departure = "BOH"
+                    distanceBoh.arival = airport.code
+                    distanceBoh.distanceKm = Convert.ToInt32(currentRow(3))
 
+                    Dim bohValue As New Dictionary(Of String, Distance)
+                    distances.TryGetValue(distanceBoh.departure, bohValue)
+                    bohValue.Add(airport.code, distanceBoh)
 
+                    count += 1
 
+                Catch ex As Microsoft.VisualBasic.
+                    FileIO.MalformedLineException
+                    Console.WriteLine("Line " & ex.Message & "is not valid and will be skipped.")
+                End Try
+            End While
 
+            Console.WriteLine("Loaded " & count & " airport data items.")
 
-        'Console.WriteLine("if you wish to go back, type 0 in menu selection")
-
-        'back = Console.ReadLine
-
-        'If back = 0 Then
-
-        'Call Sub() PrintMenu()
-
-        'End If
-
+        End Using
 
     End Sub
 
+    Function PrompFileToLoad() As String
+        Dim file As String = "D:\coding\projects\yr11-GCSE-NEA-project\Airports\Airports-NEA\Airports.txt"
+        Dim ask As Boolean = True
+        Do While ask
+            Console.WriteLine("Please specify location of CSV file with airport data")
+            Dim askFile As String = Console.ReadLine()
+            If askFile <> "" Then
+                file = askFile
+            End If
+            If FileIO.FileSystem.FileExists(file) Then
+                ask = False
+            Else
+                Console.WriteLine("File " & file & " not found.")
+            End If
+
+        Loop
+        Return file
+    End Function
+
     Sub Flight_details()
 
-        Dim back As String
-
         Console.WriteLine("under construction, flight details")
-        Console.WriteLine("if you wish to go back, type 0 in menu selection")
-
-        back = Console.ReadLine
-
-        If back = 0 Then
-
-            Call Sub() PrintMenu()
-
-        End If
-
 
     End Sub
 
     Sub Price_profit()
 
-        Dim back As String
-
         Console.WriteLine("under construction, price - profit analysis")
-        Console.WriteLine("if you wish to go back, type 0 in menu selection")
-
-        back = Console.ReadLine
-
-        If back = 0 Then
-
-            Call Sub() PrintMenu()
-
-        End If
-
 
     End Sub
 
     Sub Clear_data()
 
-        Dim back As String
-
         Console.WriteLine("under construction, clear data")
-        Console.WriteLine("if you wish to go back, type 0 in menu selection")
-
-        back = Console.ReadLine
-
-        If back = 0 Then
-
-            Call Sub() PrintMenu()
-
-        End If
-
 
     End Sub
 

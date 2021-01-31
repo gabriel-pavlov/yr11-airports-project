@@ -13,10 +13,23 @@ Module Module1
         Public distanceKm As Integer
     End Class
 
+    Class Aircraft
+        Public type As String
+        Public name As String
+        Public costPer100km As Integer
+        Public flightRange As Integer
+        Public capacity As Integer
+        Public minFirstClass As Integer
+    End Class
+
     Dim airports As New List(Of Airport)
     Dim distances As New Dictionary(Of String, Dictionary(Of String, Distance))
+    Dim aircrafts As New List(Of Aircraft)
 
-    Dim selectedAirport As Airport
+    Dim selectedDepartureAirport As Airport
+    Dim selectedArivalAirport As Airport
+    Dim selectedAircraft As Aircraft
+
 
     Sub LoadInitialAirports()
 
@@ -48,6 +61,8 @@ Module Module1
         Call Sub() LoadInitialAirports()
 
         Call Sub() LoadCSVAirports()
+
+        Call Sub() LoadAircraftType()
 
         Dim selection As String
         Dim finish As Boolean
@@ -98,7 +113,24 @@ Module Module1
         Console.WriteLine("Please select one of the options below by typing the number next to it")
         Console.WriteLine("")
         Console.WriteLine("1. Enter airport details")
+        If (Not selectedDepartureAirport Is Nothing) Then
+            Console.WriteLine("   - Departure: " & selectedDepartureAirport.code)
+            If (Not selectedArivalAirport Is Nothing) Then
+                Console.WriteLine("   - Arrival: " & selectedArivalAirport.code)
+
+                Dim valueDestinations As Dictionary(Of String, Distance)
+                distances.TryGetValue(selectedDepartureAirport.code, valueDestinations)
+                Dim valueDistance As Distance
+                valueDestinations.TryGetValue(selectedArivalAirport.code, valueDistance)
+
+                Console.WriteLine("   - Distance: " & valueDistance.distanceKm & "km")
+            End If
+        End If
         Console.WriteLine("2. Enter flight details")
+        If (Not selectedAircraft Is Nothing) Then
+            Console.WriteLine("  - Aircraft type:" & selectedAircraft.name)
+
+        End If
         Console.WriteLine("3. Enter price plan and calculate profit")
         Console.WriteLine("4. Clear data")
         Console.WriteLine("5. Quit")
@@ -125,7 +157,7 @@ Module Module1
             code = Console.ReadLine
 
             If code = "5" Then
-                back = True
+                Return
             Else
 
                 For i = 1 To airports.Count
@@ -133,7 +165,7 @@ Module Module1
                     Dim airport = airports(i - 1)
                     If airport.code.ToLower = code.ToLower Then
                         If airport.departure Then
-                            selectedAirport = airport
+                            selectedDepartureAirport = airport
                             Console.WriteLine("You have selected " & airport.name & " as your start")
                             back = True
                         Else
@@ -145,6 +177,38 @@ Module Module1
                 Next
             End If
 
+
+        Loop
+
+        back = False
+
+        Do While back = False
+
+            Console.WriteLine("Please enter the three-letter airport code for your arrival or 5 to exit to main menu")
+
+            code = Console.ReadLine
+
+            If code = "5" Then
+                Return
+            Else
+
+                For i = 1 To airports.Count
+
+                    Dim airport = airports(i - 1)
+                    If airport.code.ToLower = code.ToLower Then
+                        If Not airport.departure Then
+                            selectedArivalAirport = airport
+                            Console.WriteLine("You have selected " & airport.name & " as your start")
+                            back = True
+                            Exit For
+                        Else
+                            Console.WriteLine("You have selected " & airport.name & " which is invalid arrival location")
+                        End If
+
+                    End If
+
+                Next
+            End If
 
         Loop
 
@@ -222,7 +286,67 @@ Module Module1
 
     Sub Flight_details()
 
-        Console.WriteLine("under construction, flight details")
+        Dim back As Boolean = False
+        Dim type As String
+
+        Do While back = False
+
+            Console.WriteLine("please enter the type of aircraft that will be used for the flight or 5 to exit to the main menu")
+
+            type = Console.ReadLine
+
+            If type = "5" Then
+                Return
+            Else
+                For i = 1 To aircrafts.Count
+
+                    Dim aircraft = aircrafts(i - 1)
+                    If aircraft.type.ToLower = type.ToLower Then
+
+                        selectedAircraft = aircraft
+                        Console.WriteLine("You have selected " & aircraft.name & " as your Aircraft")
+                        back = True
+                        Exit For
+                    End If
+                Next
+                If back = False Then
+                    Console.WriteLine("You have selected " & type & " which is invalid Aircraft")
+                End If
+            End If
+        Loop
+
+
+    End Sub
+
+    Sub LoadAircraftType()
+
+        Dim MediumNarrowBody As New Aircraft()
+        MediumNarrowBody.type = "MNB"
+        MediumNarrowBody.name = "Medium narrow body"
+        MediumNarrowBody.costPer100km = 8
+        MediumNarrowBody.flightRange = 2650
+        MediumNarrowBody.capacity = 180
+        MediumNarrowBody.minFirstClass = 8
+
+        Dim LargeNarrowBody As New Aircraft()
+        LargeNarrowBody.type = "LNB"
+        LargeNarrowBody.name = "Large narrow body"
+        LargeNarrowBody.costPer100km = 7
+        LargeNarrowBody.flightRange = 5600
+        LargeNarrowBody.capacity = 220
+        LargeNarrowBody.minFirstClass = 10
+
+        Dim MediumWideBody As New Aircraft()
+        MediumWideBody.type = "MWB"
+        MediumWideBody.name = "Medium wide body"
+        MediumWideBody.costPer100km = 5
+        MediumWideBody.flightRange = 4050
+        MediumWideBody.capacity = 406
+        MediumWideBody.minFirstClass = 14
+
+        aircrafts.Add(MediumNarrowBody)
+        aircrafts.Add(LargeNarrowBody)
+        aircrafts.Add(MediumWideBody)
 
     End Sub
 

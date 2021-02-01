@@ -29,6 +29,16 @@ Module Module1
     Dim selectedDepartureAirport As Airport
     Dim selectedArivalAirport As Airport
     Dim selectedAircraft As Aircraft
+    Dim selectedFirstClassSeats As Integer
+    Dim selectedSecondClassSeats As Integer
+    Dim selectedSeatsCapacity As Integer
+
+
+    Dim codes As Boolean = False
+    Dim aircraftTypes As Boolean = False
+    Dim firstClassSeats As Boolean = False
+    Dim flightPossible As Boolean = False
+    Dim maxFlights As Integer = 0
 
 
     Sub LoadInitialAirports()
@@ -110,6 +120,8 @@ Module Module1
 
     Sub PrintMenu()
 
+
+
         Console.WriteLine("Please select one of the options below by typing the number next to it")
         Console.WriteLine("")
         Console.WriteLine("1. Enter airport details")
@@ -117,7 +129,7 @@ Module Module1
             Console.WriteLine("   - Departure: " & selectedDepartureAirport.code)
             If (Not selectedArivalAirport Is Nothing) Then
                 Console.WriteLine("   - Arrival: " & selectedArivalAirport.code)
-
+                codes = True
                 Dim valueDestinations As Dictionary(Of String, Distance)
                 distances.TryGetValue(selectedDepartureAirport.code, valueDestinations)
                 Dim valueDistance As Distance
@@ -129,7 +141,11 @@ Module Module1
         Console.WriteLine("2. Enter flight details")
         If (Not selectedAircraft Is Nothing) Then
             Console.WriteLine("  - Aircraft type:" & selectedAircraft.name)
-
+            Console.WriteLine("  - Maximum flight range" & selectedAircraft.flightRange & "km")
+            Console.WriteLine("  - Available capacity:" & selectedAircraft.capacity)
+            Console.WriteLine("  - 1st Class:" & selectedFirstClassSeats)
+            Console.WriteLine("  - 2nd Class:" & selectedSecondClassSeats)
+            Console.WriteLine("  - Calculated capacity:" & selectedSeatsCapacity)
         End If
         Console.WriteLine("3. Enter price plan and calculate profit")
         Console.WriteLine("4. Clear data")
@@ -168,13 +184,13 @@ Module Module1
                             selectedDepartureAirport = airport
                             Console.WriteLine("You have selected " & airport.name & " as your start")
                             back = True
-                        Else
-                            Console.WriteLine("You have selected " & airport.name & " which is invalid departure location")
+                            Exit For
                         End If
-
                     End If
-
                 Next
+                If back = False Then
+                    Console.WriteLine("You have selected " & code & " which is invalid departure location")
+                End If
             End If
 
 
@@ -201,13 +217,12 @@ Module Module1
                             Console.WriteLine("You have selected " & airport.name & " as your start")
                             back = True
                             Exit For
-                        Else
-                            Console.WriteLine("You have selected " & airport.name & " which is invalid arrival location")
                         End If
-
                     End If
-
                 Next
+                If back = False Then
+                    Console.WriteLine("You have selected " & code & " which is invalid arrival location")
+                End If
             End If
 
         Loop
@@ -285,6 +300,11 @@ Module Module1
     End Function
 
     Sub Flight_details()
+        Call Flight_details_body()
+        Call Flight_details_Capacity()
+    End Sub
+
+    Sub Flight_details_body()
 
         Dim back As Boolean = False
         Dim type As String
@@ -315,7 +335,43 @@ Module Module1
             End If
         Loop
 
+    End Sub
 
+    Sub Flight_details_Capacity()
+
+        Dim seatsStr As String
+        Dim back As Boolean = False
+        Dim seats As Integer
+
+        Do While back = False
+
+            Console.WriteLine("Please enter the number first class seats or press 0 to have all seats be standard")
+
+            seatsStr = Console.ReadLine
+
+
+
+        Loop
+
+
+
+        Dim seatsFirst As Integer
+        Dim seatsStand As Integer
+        Dim capacity As Integer
+
+        seats = selectedFirstClassSeats
+
+        seatsStand = selectedAircraft.capacity
+
+        If seats <> 0 Then
+            If seats >= selectedAircraft.minFirstClass Then
+                seatsFirst = seats * 2
+                capacity = seatsStand - seatsFirst
+            End If
+        ElseIf seats = 0 Then
+            capacity = selectedAircraft.capacity
+        End If
+        selectedSecondClassSeats = capacity
     End Sub
 
     Sub LoadAircraftType()
@@ -351,8 +407,20 @@ Module Module1
     End Sub
 
     Sub Price_profit()
+        If isInfoValid() Then
+            Call Sub() ProfitCalculation()
+        End If
+    End Sub
 
-        Console.WriteLine("under construction, price - profit analysis")
+    Function isInfoValid() As Boolean
+        If (selectedDepartureAirport Is Nothing) Then
+            Console.WriteLine("Error: No departure airport has been selected")
+            Return False
+        End If
+        Return True
+    End Function
+
+    Sub ProfitCalculation()
 
     End Sub
 

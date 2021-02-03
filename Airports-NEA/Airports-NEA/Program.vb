@@ -129,7 +129,6 @@ Module Module1
             Console.WriteLine("   - Departure: " & selectedDepartureAirport.code)
             If (Not selectedArivalAirport Is Nothing) Then
                 Console.WriteLine("   - Arrival: " & selectedArivalAirport.code)
-                codes = True
                 Dim valueDestinations As Dictionary(Of String, Distance)
                 distances.TryGetValue(selectedDepartureAirport.code, valueDestinations)
                 Dim valueDistance As Distance
@@ -313,6 +312,13 @@ Module Module1
 
             Console.WriteLine("please enter the type of aircraft that will be used for the flight or 5 to exit to the main menu")
 
+            For i = 1 To aircrafts.Count
+
+                Dim aircraft = aircrafts(i - 1)
+                Console.WriteLine(" " & aircraft.type & " - " & aircraft.name)
+
+            Next
+
             type = Console.ReadLine
 
             If type = "5" Then
@@ -339,39 +345,48 @@ Module Module1
 
     Sub Flight_details_Capacity()
 
-        Dim seatsStr As String
         Dim back As Boolean = False
         Dim seats As Integer
-
-        Do While back = False
-
-            Console.WriteLine("Please enter the number first class seats or press 0 to have all seats be standard")
-
-            seatsStr = Console.ReadLine
-
-
-
-        Loop
-
-
 
         Dim seatsFirst As Integer
         Dim seatsStand As Integer
         Dim capacity As Integer
 
-        seats = selectedFirstClassSeats
+        Do While back = False
 
-        seatsStand = selectedAircraft.capacity
+            Console.WriteLine("Please enter the number first class seats or press 0 to have all seats be standard")
 
-        If seats <> 0 Then
-            If seats >= selectedAircraft.minFirstClass Then
-                seatsFirst = seats * 2
-                capacity = seatsStand - seatsFirst
-            End If
-        ElseIf seats = 0 Then
+            Try
+                seats = Console.ReadLine
+            Catch ex As Exception
+                Console.WriteLine("Invalid input...")
+                Continue Do
+            End Try
+
             capacity = selectedAircraft.capacity
-        End If
-        selectedSecondClassSeats = capacity
+
+            If seats <> 0 Then
+                If seats >= selectedAircraft.minFirstClass Then
+                    seatsFirst = seats
+                    seatsStand = capacity - seatsFirst * 2
+                Else
+                    Console.WriteLine("Invalid input... Minimum number of first class seats is " & selectedAircraft.minFirstClass)
+                    Continue Do
+                End If
+            ElseIf seats = 0 Then
+                seatsFirst = 0
+                seatsStand = selectedAircraft.capacity
+            End If
+
+            selectedFirstClassSeats = seatsFirst
+            selectedSecondClassSeats = seatsStand
+            selectedSeatsCapacity = seatsStand + seatsFirst
+            back = True
+
+        Loop
+
+
+
     End Sub
 
     Sub LoadAircraftType()

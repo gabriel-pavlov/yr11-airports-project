@@ -432,6 +432,15 @@ Module Module1
             Console.WriteLine("Error: No departure airport has been selected")
             Return False
         End If
+        If (selectedArivalAirport Is Nothing) Then
+            Console.WriteLine("Error: No arrival airport has been selected")
+            Return False
+        End If
+        If (selectedAircraft Is Nothing) Then
+            Console.WriteLine("Error: No aircraft has has been selected")
+
+
+        End If
         Return True
     End Function
 

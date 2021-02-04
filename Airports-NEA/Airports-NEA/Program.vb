@@ -28,6 +28,7 @@ Module Module1
 
     Dim selectedDepartureAirport As Airport
     Dim selectedArivalAirport As Airport
+    Dim selectedDistance As Distance
     Dim selectedAircraft As Aircraft
     Dim selectedFirstClassSeats As Integer
     Dim selectedSecondClassSeats As Integer
@@ -129,22 +130,19 @@ Module Module1
             Console.WriteLine("   - Departure: " & selectedDepartureAirport.code)
             If (Not selectedArivalAirport Is Nothing) Then
                 Console.WriteLine("   - Arrival: " & selectedArivalAirport.code)
-                Dim valueDestinations As Dictionary(Of String, Distance)
-                distances.TryGetValue(selectedDepartureAirport.code, valueDestinations)
-                Dim valueDistance As Distance
-                valueDestinations.TryGetValue(selectedArivalAirport.code, valueDistance)
-
-                Console.WriteLine("   - Distance: " & valueDistance.distanceKm & "km")
+                If (Not selectedDistance Is Nothing) Then
+                    Console.WriteLine("   - Distance: " & selectedDistance.distanceKm & "km")
+                End If
             End If
         End If
         Console.WriteLine("2. Enter flight details")
         If (Not selectedAircraft Is Nothing) Then
-            Console.WriteLine("  - Aircraft type:" & selectedAircraft.name)
-            Console.WriteLine("  - Maximum flight range" & selectedAircraft.flightRange & "km")
-            Console.WriteLine("  - Available capacity:" & selectedAircraft.capacity)
-            Console.WriteLine("  - 1st Class:" & selectedFirstClassSeats)
-            Console.WriteLine("  - 2nd Class:" & selectedSecondClassSeats)
-            Console.WriteLine("  - Calculated capacity:" & selectedSeatsCapacity)
+            Console.WriteLine("  - Aircraft type: " & selectedAircraft.name)
+            Console.WriteLine("  - Maximum flight range: " & selectedAircraft.flightRange & "km")
+            Console.WriteLine("  - Available capacity: " & selectedAircraft.capacity)
+            Console.WriteLine("  - 1st Class: " & selectedFirstClassSeats)
+            Console.WriteLine("  - 2nd Class: " & selectedSecondClassSeats)
+            Console.WriteLine("  - Calculated capacity: " & selectedSeatsCapacity)
         End If
         Console.WriteLine("3. Enter price plan and calculate profit")
         Console.WriteLine("4. Clear data")
@@ -213,6 +211,7 @@ Module Module1
                     If airport.code.ToLower = code.ToLower Then
                         If Not airport.departure Then
                             selectedArivalAirport = airport
+                            selectedDistance = getDistanceForSelectedAirports()
                             Console.WriteLine("You have selected " & airport.name & " as your start")
                             back = True
                             Exit For
@@ -227,6 +226,23 @@ Module Module1
         Loop
 
     End Sub
+
+    Function getDistanceForSelectedAirports() As Distance
+
+        If (Not selectedDepartureAirport Is Nothing) Then
+            If (Not selectedArivalAirport Is Nothing) Then
+                Dim valueDestinations As Dictionary(Of String, Distance)
+                distances.TryGetValue(selectedDepartureAirport.code, valueDestinations)
+                Dim valueDistance As Distance
+                valueDestinations.TryGetValue(selectedArivalAirport.code, valueDistance)
+                Return valueDistance
+            End If
+        End If
+
+        Return Nothing
+
+    End Function
+
     Sub LoadCSVAirports()
 
         Using csv As New Microsoft.VisualBasic.FileIO.TextFieldParser(PrompFileToLoad())
@@ -423,11 +439,13 @@ Module Module1
 
     Sub Price_profit()
         If isInfoValid() Then
+            Console.WriteLine("All information is valid")
             Call Sub() ProfitCalculation()
         End If
     End Sub
 
     Function isInfoValid() As Boolean
+
         If (selectedDepartureAirport Is Nothing) Then
             Console.WriteLine("Error: No departure airport has been selected")
             Return False
@@ -438,13 +456,25 @@ Module Module1
         End If
         If (selectedAircraft Is Nothing) Then
             Console.WriteLine("Error: No aircraft has has been selected")
-
-
+            Return False
+        End If
+        If (selectedAircraft Is Nothing) Then
+            Console.WriteLine("Error: Number of First and standard class has not been entered")
+            Return False
+        End If
+        If (selectedDistance Is Nothing Or selectedAircraft.flightRange < selectedDistance.distanceKm) Then
+            Console.WriteLine("Error: Aircraft doesn't have enough fuel to reach destination")
+            Return False
         End If
         Return True
     End Function
 
     Sub ProfitCalculation()
+
+        Dim priceStandard As Integer
+        Dim priceFirst As Integer
+
+        Console.WriteLine("please enter the price of first and standard class seats")
 
     End Sub
 

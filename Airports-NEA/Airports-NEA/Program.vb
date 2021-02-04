@@ -29,17 +29,16 @@ Module Module1
     Dim selectedDepartureAirport As Airport
     Dim selectedArivalAirport As Airport
     Dim selectedDistance As Distance
+
     Dim selectedAircraft As Aircraft
     Dim selectedFirstClassSeats As Integer
     Dim selectedSecondClassSeats As Integer
     Dim selectedSeatsCapacity As Integer
 
+    Dim selectedPriceStandard As Decimal = -1
+    Dim selectedPriceFirst As Decimal = -1
 
-    Dim codes As Boolean = False
-    Dim aircraftTypes As Boolean = False
-    Dim firstClassSeats As Boolean = False
-    Dim flightPossible As Boolean = False
-    Dim maxFlights As Integer = 0
+    Dim flightCostPerSeat As Decimal = -1
 
 
     Sub LoadInitialAirports()
@@ -76,15 +75,10 @@ Module Module1
         Call Sub() LoadAircraftType()
 
         Dim selection As String
-        Dim finish As Boolean
-
 
         'this sets out the menu
 
-        finish = False
-
-
-        Do While finish = False
+        Do While True
 
             Call Sub() PrintMenu()
 
@@ -101,7 +95,7 @@ Module Module1
                     Call Sub() Clear_data()
                 Case 5
                     Call Sub() Quit()
-                    finish = True
+                    Exit Do
                 Case Else
                     Console.WriteLine("Invalid option: " & selection)
             End Select
@@ -143,8 +137,19 @@ Module Module1
             Console.WriteLine("  - 1st Class: " & selectedFirstClassSeats)
             Console.WriteLine("  - 2nd Class: " & selectedSecondClassSeats)
             Console.WriteLine("  - Calculated capacity: " & selectedSeatsCapacity)
+            Console.WriteLine("  - Running cost per seat per 100km: £" & selectedAircraft.costPer100km)
         End If
         Console.WriteLine("3. Enter price plan and calculate profit")
+        If (selectedPriceStandard >= 0) Then
+            Console.WriteLine("  - Price of standard-class seat: £" & selectedPriceStandard)
+        End If
+        If (selectedPriceFirst >= 0) Then
+            Console.WriteLine("  - Price of first-class seat: £" & selectedPriceFirst)
+        End If
+        If (flightCostPerSeat >= 0) Then
+            Console.WriteLine("  - Flight cost per seat: £" & flightCostPerSeat)
+        End If
+
         Console.WriteLine("4. Clear data")
         Console.WriteLine("5. Quit")
 
@@ -160,10 +165,9 @@ Module Module1
 
     Sub Airport_details()
 
-        Dim back As Boolean = False
         Dim code As String
 
-        Do While back = False
+        Do While True
 
             Console.WriteLine("Please enter the three-letter airport code for your departure or 5 to exit to main menu")
 
@@ -173,6 +177,8 @@ Module Module1
                 Return
             Else
 
+                Dim airportFound As Boolean = False
+
                 For i = 1 To airports.Count
 
                     Dim airport = airports(i - 1)
@@ -180,12 +186,14 @@ Module Module1
                         If airport.departure Then
                             selectedDepartureAirport = airport
                             Console.WriteLine("You have selected " & airport.name & " as your start")
-                            back = True
+                            airportFound = True
                             Exit For
                         End If
                     End If
                 Next
-                If back = False Then
+                If airportFound Then
+                    Exit Do
+                Else
                     Console.WriteLine("You have selected " & code & " which is invalid departure location")
                 End If
             End If
@@ -193,9 +201,7 @@ Module Module1
 
         Loop
 
-        back = False
-
-        Do While back = False
+        Do While True
 
             Console.WriteLine("Please enter the three-letter airport code for your arrival or 5 to exit to main menu")
 
@@ -205,6 +211,8 @@ Module Module1
                 Return
             Else
 
+                Dim airportFound As Boolean = False
+
                 For i = 1 To airports.Count
 
                     Dim airport = airports(i - 1)
@@ -213,12 +221,14 @@ Module Module1
                             selectedArivalAirport = airport
                             selectedDistance = getDistanceForSelectedAirports()
                             Console.WriteLine("You have selected " & airport.name & " as your start")
-                            back = True
+                            airportFound = True
                             Exit For
                         End If
                     End If
                 Next
-                If back = False Then
+                If airportFound Then
+                    Exit Do
+                Else
                     Console.WriteLine("You have selected " & code & " which is invalid arrival location")
                 End If
             End If
@@ -321,10 +331,9 @@ Module Module1
 
     Sub Flight_details_body()
 
-        Dim back As Boolean = False
         Dim type As String
 
-        Do While back = False
+        Do While True
 
             Console.WriteLine("please enter the type of aircraft that will be used for the flight or 5 to exit to the main menu")
 
@@ -340,6 +349,8 @@ Module Module1
             If type = "5" Then
                 Return
             Else
+                Dim aircraftFound As Boolean = False
+
                 For i = 1 To aircrafts.Count
 
                     Dim aircraft = aircrafts(i - 1)
@@ -347,11 +358,13 @@ Module Module1
 
                         selectedAircraft = aircraft
                         Console.WriteLine("You have selected " & aircraft.name & " as your Aircraft")
-                        back = True
+                        aircraftFound = True
                         Exit For
                     End If
                 Next
-                If back = False Then
+                If aircraftFound Then
+                    Exit Do
+                Else
                     Console.WriteLine("You have selected " & type & " which is invalid Aircraft")
                 End If
             End If
@@ -361,14 +374,14 @@ Module Module1
 
     Sub Flight_details_Capacity()
 
-        Dim back As Boolean = False
+
         Dim seats As Integer
 
         Dim seatsFirst As Integer
         Dim seatsStand As Integer
         Dim capacity As Integer
 
-        Do While back = False
+        Do While True
 
             Console.WriteLine("Please enter the number first class seats or press 0 to have all seats be standard")
 
@@ -397,7 +410,7 @@ Module Module1
             selectedFirstClassSeats = seatsFirst
             selectedSecondClassSeats = seatsStand
             selectedSeatsCapacity = seatsStand + seatsFirst
-            back = True
+            Exit Do
 
         Loop
 
@@ -439,7 +452,6 @@ Module Module1
 
     Sub Price_profit()
         If isInfoValid() Then
-            Console.WriteLine("All information is valid")
             Call Sub() ProfitCalculation()
         End If
     End Sub
@@ -471,10 +483,53 @@ Module Module1
 
     Sub ProfitCalculation()
 
-        Dim priceStandard As Integer
-        Dim priceFirst As Integer
+        Dim priceStandard As Decimal
+        Dim priceFirst As Decimal
 
-        Console.WriteLine("please enter the price of first and standard class seats")
+        Do While True
+
+            Console.WriteLine("please enter the price of first class seats")
+
+            Try
+                priceFirst = Console.ReadLine
+            Catch ex As Exception
+                Console.WriteLine("Invalid input...")
+                Continue Do
+            End Try
+
+            If priceFirst < 0 Then
+                Console.WriteLine("Please enter a positive number")
+            Else
+                Exit Do
+            End If
+
+        Loop
+
+        selectedPriceFirst = priceFirst
+
+        Do While True
+
+            Console.WriteLine("please enter the price of standard class seats")
+
+            Try
+                priceStandard = Console.ReadLine
+            Catch ex As Exception
+                Console.WriteLine("Invalid input...")
+                Continue Do
+            End Try
+
+            If priceStandard < 0 Then
+                Console.WriteLine("Please enter a positive number")
+            Else
+                Exit Do
+            End If
+
+        Loop
+
+        selectedPriceStandard = priceStandard
+
+        flightCostPerSeat = (selectedAircraft.costPer100km * selectedDistance.distanceKm) / 100.0
+
 
     End Sub
 

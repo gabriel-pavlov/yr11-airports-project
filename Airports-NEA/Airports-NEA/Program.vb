@@ -170,8 +170,6 @@ Module Module1
 
     Sub Quit()
 
-        Console.WriteLine("Please press enter to quit the program")
-        Console.ReadLine()
 
     End Sub
 
@@ -549,7 +547,23 @@ Module Module1
 
     Sub Clear_data()
 
-        Console.WriteLine("under construction, clear data")
+        selectedDepartureAirport = Nothing
+        selectedArivalAirport = Nothing
+        selectedDistance = Nothing
+
+        selectedAircraft = Nothing
+        selectedFirstClassSeats = -1
+        selectedSecondClassSeats = -1
+        selectedSeatsCapacity = -1
+
+        selectedPriceStandard = -1
+        selectedPriceFirst = -1
+
+        flightCostPerSeat = -1
+        flightCost = -1
+        flightIncome = -1
+        flightProfit = -1
+
 
     End Sub
 

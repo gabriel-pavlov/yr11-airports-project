@@ -39,6 +39,10 @@ Module Module1
     Dim selectedPriceFirst As Decimal = -1
 
     Dim flightCostPerSeat As Decimal = -1
+    Dim flightCost As Decimal = -1
+    Dim flightIncome As Decimal = -1
+    Dim flightProfit As Decimal = -1
+
 
 
     Sub LoadInitialAirports()
@@ -133,11 +137,11 @@ Module Module1
         If (Not selectedAircraft Is Nothing) Then
             Console.WriteLine("  - Aircraft type: " & selectedAircraft.name)
             Console.WriteLine("  - Maximum flight range: " & selectedAircraft.flightRange & "km")
+            Console.WriteLine("  - Running cost per seat per 100km: £" & selectedAircraft.costPer100km)
             Console.WriteLine("  - Available capacity: " & selectedAircraft.capacity)
             Console.WriteLine("  - 1st Class: " & selectedFirstClassSeats)
             Console.WriteLine("  - 2nd Class: " & selectedSecondClassSeats)
             Console.WriteLine("  - Calculated capacity: " & selectedSeatsCapacity)
-            Console.WriteLine("  - Running cost per seat per 100km: £" & selectedAircraft.costPer100km)
         End If
         Console.WriteLine("3. Enter price plan and calculate profit")
         If (selectedPriceStandard >= 0) Then
@@ -149,7 +153,15 @@ Module Module1
         If (flightCostPerSeat >= 0) Then
             Console.WriteLine("  - Flight cost per seat: £" & flightCostPerSeat)
         End If
-
+        If (flightCost >= 0) Then
+            Console.WriteLine("  - Flight expenses: £" & flightCost)
+        End If
+        If (flightIncome >= 0) Then
+            Console.WriteLine("  - Flight income: £" & flightIncome)
+        End If
+        If (flightProfit >= 0) Then
+            Console.WriteLine("  - Flight total profit: £" & flightProfit)
+        End If
         Console.WriteLine("4. Clear data")
         Console.WriteLine("5. Quit")
 
@@ -488,27 +500,6 @@ Module Module1
 
         Do While True
 
-            Console.WriteLine("please enter the price of first class seats")
-
-            Try
-                priceFirst = Console.ReadLine
-            Catch ex As Exception
-                Console.WriteLine("Invalid input...")
-                Continue Do
-            End Try
-
-            If priceFirst < 0 Then
-                Console.WriteLine("Please enter a positive number")
-            Else
-                Exit Do
-            End If
-
-        Loop
-
-        selectedPriceFirst = priceFirst
-
-        Do While True
-
             Console.WriteLine("please enter the price of standard class seats")
 
             Try
@@ -528,8 +519,31 @@ Module Module1
 
         selectedPriceStandard = priceStandard
 
-        flightCostPerSeat = (selectedAircraft.costPer100km * selectedDistance.distanceKm) / 100.0
+        Do While True
 
+            Console.WriteLine("please enter the price of first class seats")
+
+            Try
+                priceFirst = Console.ReadLine
+            Catch ex As Exception
+                Console.WriteLine("Invalid input...")
+                Continue Do
+            End Try
+
+            If priceFirst < 0 Then
+                Console.WriteLine("Please enter a positive number")
+            Else
+                Exit Do
+            End If
+
+        Loop
+
+        selectedPriceFirst = priceFirst
+
+        flightCostPerSeat = (selectedAircraft.costPer100km * selectedDistance.distanceKm) / 100.0
+        flightCost = flightCostPerSeat * (selectedFirstClassSeats + selectedSecondClassSeats)
+        flightIncome = (selectedFirstClassSeats * selectedPriceFirst) + (selectedSecondClassSeats * selectedPriceStandard)
+        flightProfit = flightIncome - flightCost
 
     End Sub
 
